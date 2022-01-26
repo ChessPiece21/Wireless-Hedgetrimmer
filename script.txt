@@ -1,0 +1,569 @@
+title I Wish I Had a Wireless Hedgetrimmer: A Text-Based Adventure
+author Joe "ChessPiece" Lollo
+homepage www.puzzlescript.net
+
+require_player_movement
+
+background_color #BCED35
+text_color darkgreen
+noaction
+
+========
+OBJECTS
+========
+
+Background
+#BCED35 lightgreen
+00000
+00000
+00100
+00000
+00000
+
+
+WallFront
+GRAY darkgray
+00000
+00000
+00000
+11111
+11111
+
+WallTop
+gray
+.000.
+.000.
+.000.
+.000.
+.000.
+
+WallFrontLeft
+GRAY darkgray
+.0000
+.0000
+.0000
+.1111
+.1111
+
+WallFrontRight
+GRAY darkgray
+0000.
+0000.
+0000.
+1111.
+1111.
+
+WallTopLeft
+gray darkgray
+.0000
+.0000
+.0000
+.0001
+.0001
+
+WallTopRight
+gray darkgray
+0000.
+0000.
+0000.
+1000.
+1000.
+
+WallFrontCenter
+GRAY darkgray
+.000.
+.000.
+.000.
+.111.
+.111.
+
+TrimPlayer
+Black Orange White Blue gray darkred
+.000.
+.1114
+22225
+.3335
+.3.3.
+
+CanPlayer
+Black Orange White Blue gray lightgray
+.000.
+.114.
+22454
+.344.
+.3.3.
+
+UntrimmedHedge
+#003F06 GREEN BROWN
+.0010
+10000
+0000.
+00010
+.000.
+
+TrimmedHedge
+#003F06 green BROWN
+.000.
+00100
+01010
+.000.
+..2..
+
+WateredHedge
+green lightgreen BROWN #477CB5 #7DAC61
+.000.
+00100
+01010
+.000.
+43234
+
+WireUp
+red
+..0..
+..0..
+..0..
+.....
+.....
+
+WireLeft
+red blue
+.....
+.....
+000..
+.....
+.....
+
+WireDown
+red
+.....
+.....
+..0..
+..0..
+..0..
+
+WireRight
+red
+.....
+.....
+..000
+.....
+.....
+
+InvisibleWall
+transparent
+.....
+.....
+..0..
+.....
+.....
+
+WateringCan
+gray lightgray
+.....
+..0..
+.0100
+.000.
+.....
+
+HedgeTrimmer
+gray darkred
+.....
+..0..
+..1..
+..1..
+.....
+
+LeftGenerator
+orange black red lightbrown darkgray
+1111.
+10014
+11112
+10014
+0000.
+
+RightGenerator
+orange black red lightbrown darkgray
+.1111
+41001
+21111
+41001
+.0000
+
+
+Blank
+#BCED35
+
+Crate
+lightbrown brown
+.....
+.000.
+.000.
+.111.
+.....
+
+NoWire
+transparent
+
+=======
+LEGEND
+=======
+
+Player = TrimPlayer or CanPlayer
+Wall = WallFront or WallTop or WallTopLeft or WallTopRight or WallFrontRight or WallFrontLeft or InvisibleWall or WallFrontCenter
+Hedge = UntrimmedHedge or TrimmedHedge or WateredHedge
+HorizontalWire = WireLeft or WireRight
+VerticalWire = WireUp or WireDown
+Wire = HorizontalWire or VerticalWire
+Generator = LeftGenerator or RightGenerator
+
+
+. = Background
+- = Blank
+
+# = WallFront
+% = WallTop
+1 = WallFrontLeft
+2 = WallFrontRight
+3 = WallTopLeft
+4 = WallTopRight
+" = WallFrontCenter
+
+P = TrimPlayer and WireLeft
+H = UntrimmedHedge
+T = TrimmedHedge
+W = WateringCan
+G = LeftGenerator and InvisibleWall
+C = Crate
+K = TrimPlayer and NoWire
+J = WateringCan and NoWire
+N = NoWire
+B = HedgeTrimmer and WireRight
+R = RightGenerator and InvisibleWall
+
+=======
+SOUNDS
+=======
+
+sfx0 30021102
+WateringCan destroy 72402103
+HedgeTrimmer destroy 72402103
+TrimmedHedge destroy 39745503
+endlevel 17109100
+Player move 78617507
+
+================
+COLLISIONLAYERS
+================
+
+Background
+NoWire
+Blank
+WireLeft
+WireUp
+WireDown
+WireRight
+Generator
+Player, Wall, Hedge, Crate, WateringCan, HedgeTrimmer
+
+======
+RULES
+======
+
+[up TrimPlayer ] -> [up TrimPlayer WireUp]
+[down TrimPlayer] -> [down TrimPlayer WireDown]
+[left TrimPlayer] -> [left TrimPlayer WireLeft]
+[right TrimPlayer] -> [right TrimPlayer WireRight]
+
+late up [WireUp | no WireDown] [TrimPlayer] -> [WireUp | WireDown][TrimPlayer]
+late down [WireDown | no WireUp] [TrimPlayer]-> [WireDown | WireUp][TrimPlayer]
+late Left [WireLeft | no WireRight] [TrimPlayer]-> [WireLeft | WireRight][TrimPlayer]
+late right [WireRight | no WireLeft] [TrimPlayer]-> [WireRight | WireLeft][TrimPlayer]
+
+late up [WireUp | no WireDown] [CanPlayer] -> [ | ][CanPlayer]
+late down [WireDown | no WireUp] [CanPlayer]-> [ | ][CanPlayer]
+late Left [WireLeft | no WireRight] [CanPlayer]-> [ | ][CanPlayer]
+late right [WireRight | no WireLeft] [CanPlayer]-> [ | ][CanPlayer]
+
+late [Wire no TrimPlayer no HedgeTrimmer no NoWire] [TrimPlayer]-> [Wire InvisibleWall][TrimPlayer]
+
+late [TrimPlayer | UntrimmedHedge] -> [TrimPlayer | TrimmedHedge sfx0]
+
+([action TrimPlayer | WateringCan] -> [HedgeTrimmer | CanPlayer]
+[action CanPlayer | HedgeTrimmer] -> [WateringCan | TrimPlayer])
+
+
+[> TrimPlayer | WateringCan] -> [HedgeTrimmer | CanPlayer no Wire]
+[> TrimPlayer | HedgeTrimmer] -> [HedgeTrimmer no Wire | TrimPlayer no Wire]
+[> CanPlayer | HedgeTrimmer] -> [WateringCan | TrimPlayer]
+
+late [Wire NoWire] -> [NoWire]
+
+
+late [CanPlayer | TrimmedHedge] -> [CanPlayer | WateredHedge]
+
+[ > CanPlayer | Wall ] -> cancel
+
+[> Player | Crate] -> [> Player | > Crate] 
+
+
+==============
+WINCONDITIONS
+==============
+
+no UntrimmedHedge
+no TrimmedHedge
+
+=======
+LEVELS
+=======
+
+message I need to trim and then water each plant!
+message Walk on top of a tool to pick it up. Z to undo. R to restart.
+message Level 1/6 - My Neighbor's Front Yard
+
+3#############4
+%.............%
+%.............%
+%......h....%.%
+%gp.........%j%
+%....h...h..".%
+%.............%
+%.............%
+1#############2
+
+
+
+message Level 2/6 - Office Lawn
+3#######4
+%.gp....%
+%.......%
+%.......%
+%..%.%..%
+%..%w%..%
+%.."."..%
+%.......%
+%.......%
+%h.....h%
+1#######2
+
+
+message Level 3/6 - Blue Park
+3##########4-
+%..........14
+%......1#2..%
+%.h".h..w...%
+%.h....1#2..%
+%.h..h......%
+%.......h...%
+1##4.gp3####2
+---1###2-----
+
+message Level 4/6 - Community Garden
+3#######4
+%.......%
+32h...h14
+%.......%
+%.......%
+3#h...h14
+%...w...%
+%...%...%
+%gp.%...%
+1#######2
+
+
+message Level 5/6 - Mini Golf Course
+----3###4-
+3###2gp.%-
+%.......%-
+%h12h...14
+%.....w.h%
+%........%
+14..h....%
+-%.......%
+-%.....h.%
+-%...3###2
+-1###2----
+
+message Level 6/6 - Grandma's Garden
+3#########4
+%.........%
+%.h.......%
+%.h...hh..%
+%.hhhh....%
+%.........%
+%....%w...%
+%.gp.3####2
+1####2-----
+(
+message Maybe getting a second hedgetrimmer would make things easier?
+message Level 7/9 - Bocce Court
+-3#######4-
+-%.......%-
+-%.hwh.h.%-
+-%.h.h.h.%-
+-%.h.h.h.%-
+32.h.h.h.14
+%.........%
+%gp.....br%
+1#########2
+
+message Level 8/9 - Zen Garden
+3########4
+%........%
+%...."...%
+%.."..h..%
+%..h..h..%
+%..h..h..%
+%..h..h..%
+3##2..1##4
+%........%
+%gp...br.%
+%.......w%
+1########2
+
+message Level 9/9: Grandma's Garden
+------3######4
+------%......%
+3#####2......%
+%............%
+%..w....br...%
+%............%
+%......h..h..%
+%..h....h....%
+%...h....h...%
+%h...h....h..%
+%...12.......%
+%............%
+%....gp....h.%
+%...........h%
+%............%
+1############2)
+
+
+
+message I did enough landscaping work and now I can afford a wireless hedgetrimmer!
+
+-3#####4-
+32nnnnj14
+%nnhnhnn%
+%nnhnhnn%
+%nnnnnnn%
+%nhnnnhn%
+%nnhhhnn%
+14knnnn32
+-1#####2-
+
+
+
+
+message Thanks for your help! :)
+
+
+
+( 
+Alternate level 4 - almost a more fun solution? Use this if difficulty jump from 3 to 4 is too great
+"""""""""
+".h....."
+"......."
+"....h.."
+"......."
+"h.w...."
+"....h.h"
+"......."
+""gp"""""
+
+Level 1 but with a bit more of a hook except there's a >50% chance that players dont see the hook so what da heck did I make this for 
+3#########4
+%.........%
+%....h....%
+%.......%.%
+%gp..h..%j%
+%.......".%
+%....h....%
+%.........%
+1#########2
+
+Old level 1 - somewhat hookless, but might do a better job of "let me escape the borning tutorial puzzle" - maybe go back to this one if the current one  
+-------------
+-------------
+3###########4
+%...........%
+%...h.h.h.w.%
+%gp.........%
+1###########2
+-------------
+-------------
+
+Level 8 with the watering can at the left - this one seemed like it would have been easier to stumble upon the answer. 
+3########4
+%........%
+%..."....%
+%..h.."..%
+%..h..h..%
+%..h..h..%
+%..h..h..%
+3##2..1##4
+%........%
+%.gp...br%
+%."......%
+%w.......%
+1########2
+
+-----%%%%%%%%
+%%%%%%......%
+%......w....%
+%...........%
+%......h..h.%
+%..h....h...%
+%...h....h..%
+%h...h....h.%
+%...12......%
+%..gp.....br%
+%...........%
+%......%%%%%%
+%%%%%%%%-----
+
+-----%%%%%%%%
+%%%%%%......%
+%...........%
+%rb.....pg..%
+%......12...%
+%.h....h...h%
+%..h....h...%
+%...h....h..%
+%.h..h......%
+%...........%
+%....w......%
+%......%%%%%%
+%%%%%%%%-----
+
+%%%%%%%%-----
+%......%%%%%%
+%...........%
+%..gp.....br%
+%...12......%
+%h...h....h.%
+%...h....h..%
+%..h....h...%
+%......h..h.%
+%...........%
+%......w....%
+%%%%%%......%
+-----%%%%%%%%
+
+------3#####4
+------%.....%
+3#####2.....%
+%...........%
+%..w....br..%
+%...........%
+%......h..h.%
+%..h....h...%
+%...h....h..%
+%h...h....h.%
+%...12......%
+%...........%
+%....gp..h..%
+%.........h.%
+1###########2
+)
